@@ -164,10 +164,58 @@ const replaceNote = async (req, res) => {
 	}
 };
 
+const updateNote = async (req, res) => {
+	const { id } = req.params;
+
+	if (!mongoose.Types.ObjectId.isValid(id)) {
+		return res.status(400).json({
+			success: false,
+			message: "Invalid note id",
+			data: null,
+		});
+	}
+
+	if (!req.body || Object.keys(req.body).length === 0) {
+		return res.status(400).json({
+			success: false,
+			message: "No fields provided to update",
+			data: null,
+		});
+	}
+
+	try {
+		const note = await Note.findByIdAndUpdate(id, req.body, {
+			new: true,
+			runValidators: true,
+		});
+
+		if (!note) {
+			return res.status(404).json({
+				success: false,
+				message: "Note not found",
+				data: null,
+			});
+		}
+
+		return res.status(200).json({
+			success: true,
+			message: "Note updated successfully",
+			data: note,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Failed to update note",
+			data: null,
+		});
+	}
+};
+
 module.exports = {
 	createNote,
 	bulkCreateNotes,
 	getAllNotes,
 	getNoteById,
 	replaceNote,
+	updateNote,
 };
