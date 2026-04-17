@@ -1,6 +1,17 @@
 const Note = require("../models/note.model");
 const mongoose = require("mongoose");
 
+const getValidationErrorResponse = (error) => {
+	if (error.name === "ValidationError") {
+		return {
+			status: 400,
+			message: error.message,
+		};
+	}
+
+	return null;
+};
+
 const createNote = async (req, res) => {
 	const { title, content, category, isPinned } = req.body;
 
@@ -20,6 +31,15 @@ const createNote = async (req, res) => {
 			data: note,
 		});
 	} catch (error) {
+		const validationError = getValidationErrorResponse(error);
+		if (validationError) {
+			return res.status(validationError.status).json({
+				success: false,
+				message: validationError.message,
+				data: null,
+			});
+		}
+
 		return res.status(500).json({
 			success: false,
 			message: "Failed to create note",
@@ -47,6 +67,15 @@ const bulkCreateNotes = async (req, res) => {
 			data: createdNotes,
 		});
 	} catch (error) {
+		const validationError = getValidationErrorResponse(error);
+		if (validationError) {
+			return res.status(validationError.status).json({
+				success: false,
+				message: validationError.message,
+				data: null,
+			});
+		}
+
 		return res.status(500).json({
 			success: false,
 			message: "Failed to create notes",
@@ -156,6 +185,15 @@ const replaceNote = async (req, res) => {
 			data: note,
 		});
 	} catch (error) {
+		const validationError = getValidationErrorResponse(error);
+		if (validationError) {
+			return res.status(validationError.status).json({
+				success: false,
+				message: validationError.message,
+				data: null,
+			});
+		}
+
 		return res.status(500).json({
 			success: false,
 			message: "Failed to replace note",
@@ -203,6 +241,15 @@ const updateNote = async (req, res) => {
 			data: note,
 		});
 	} catch (error) {
+		const validationError = getValidationErrorResponse(error);
+		if (validationError) {
+			return res.status(validationError.status).json({
+				success: false,
+				message: validationError.message,
+				data: null,
+			});
+		}
+
 		return res.status(500).json({
 			success: false,
 			message: "Failed to update note",
