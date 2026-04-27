@@ -430,6 +430,34 @@ const getPinnedNotes = async (req, res) => {
   }
 };
 
+const filterByCategory = async (req, res) => {
+  const { name } = req.query;
+
+  if (!name) {
+    return res.status(400).json({
+      success: false,
+      message: "Query param 'name' is required",
+      data: null
+    });
+  }
+
+  try {
+    const notes = await Note.find({ category: name });
+    return res.status(200).json({
+      success: true,
+      message: `Notes filtered by category: ${name}`,
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to filter notes by category",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -443,5 +471,6 @@ module.exports = {
   getNotesByStatus,
   getNoteSummary,
   filterNotes,
-  getPinnedNotes
+  getPinnedNotes,
+  filterByCategory
 };
