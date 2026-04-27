@@ -113,9 +113,60 @@ const getNoteById = async (req, res) => {
   }
 };
 
+// 5. Replace a note (PUT /api/notes/:id)
+const replaceNote = async (req, res) => {
+  const { id } = req.params;
+  const { title, content, category, isPinned } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid note ID",
+      data: null
+    });
+  }
+
+  if (!title || !content) {
+    return res.status(400).json({
+      success: false,
+      message: "Title and content are required",
+      data: null
+    });
+  }
+
+  try {
+    const note = await Note.findByIdAndUpdate(
+      id,
+      { title, content, category: category || "personal", isPinned: isPinned || false },
+      { new: true, overwrite: true, runValidators: true }
+    );
+
+    if (!note) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+        data: null
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Note replaced successfully",
+      data: note
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to replace note",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
   getAllNotes,
-  getNoteById
+  getNoteById,
+  replaceNote
 };
