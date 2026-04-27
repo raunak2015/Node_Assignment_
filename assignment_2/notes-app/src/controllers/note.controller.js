@@ -566,6 +566,40 @@ const paginateByCategory = async (req, res) => {
   }
 };
 
+const sortNotes = async (req, res) => {
+  const allowed = ["title", "createdAt", "updatedAt", "category"];
+  const sortBy = req.query.sortBy || "createdAt";
+  const orderParam = req.query.order || "desc";
+
+  if (!allowed.includes(sortBy)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid sortBy. Allowed: title, createdAt, updatedAt, category",
+      data: null
+    });
+  }
+
+  const order = orderParam === "asc" ? 1 : -1;
+
+  try {
+    const notes = await Note.find().sort({ [sortBy]: order });
+    const orderStr = order === 1 ? "ascending" : "descending";
+
+    return res.status(200).json({
+      success: true,
+      message: `Notes sorted by ${sortBy} in ${orderStr} order`,
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to sort notes",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -583,5 +617,6 @@ module.exports = {
   filterByCategory,
   filterByDateRange,
   paginateNotes,
-  paginateByCategory
+  paginateByCategory,
+  sortNotes
 };
