@@ -57,7 +57,27 @@ const bulkCreateNotes = async (req, res) => {
   }
 };
 
+// 3. Get all notes (GET /api/notes)
+const getAllNotes = async (req, res) => {
+  try {
+    const notes = await Note.find();
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched successfully",
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch notes",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
-  bulkCreateNotes
+  bulkCreateNotes,
+  getAllNotes
 };
