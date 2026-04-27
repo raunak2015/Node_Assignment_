@@ -34,3 +34,4 @@ coverage/
 .idea/
 .DS_Store
 Thumbs.db
+notes_api.postman_collection.json
