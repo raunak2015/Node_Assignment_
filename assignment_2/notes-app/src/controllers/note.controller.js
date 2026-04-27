@@ -274,6 +274,44 @@ const bulkDeleteNotes = async (req, res) => {
   }
 };
 
+const getNotesByCategory = async (req, res) => {
+  const { category } = req.params;
+  const allowedCategories = ["work", "personal", "study"];
+
+  if (!allowedCategories.includes(category)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid category. Allowed: work, personal, study",
+      data: null
+    });
+  }
+
+  try {
+    const notes = await Note.find({ category });
+
+    if (notes.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No notes found for category: ${category}`,
+        data: null
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Notes fetched for category: ${category}`,
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch notes by category",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -282,5 +320,6 @@ module.exports = {
   replaceNote,
   updateNote,
   deleteNote,
-  bulkDeleteNotes
+  bulkDeleteNotes,
+  getNotesByCategory
 };
