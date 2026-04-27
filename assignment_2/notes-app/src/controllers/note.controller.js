@@ -406,6 +406,30 @@ const filterNotes = async (req, res) => {
   }
 };
 
+const getPinnedNotes = async (req, res) => {
+  const filter = { isPinned: true };
+
+  if (req.query.category) {
+    filter.category = req.query.category;
+  }
+
+  try {
+    const notes = await Note.find(filter);
+    return res.status(200).json({
+      success: true,
+      message: "Pinned notes fetched successfully",
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch pinned notes",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -418,5 +442,6 @@ module.exports = {
   getNotesByCategory,
   getNotesByStatus,
   getNoteSummary,
-  filterNotes
+  filterNotes,
+  getPinnedNotes
 };
