@@ -304,6 +304,38 @@ const searchNotesByTitle = async (req, res) => {
   }
 };
 
+// 10. Search notes by content (GET /api/notes/search/content)
+const searchNotesByContent = async (req, res) => {
+  const query = req.query.q || req.query.query;
+
+  if (!query) {
+    return res.status(400).json({
+      success: false,
+      message: "Search query is required",
+      data: null
+    });
+  }
+
+  try {
+    const notes = await Note.find({
+      content: { $regex: query, $options: "i" }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Notes matching content query: '${query}'`,
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to search notes by content",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -313,8 +345,10 @@ module.exports = {
   updateNote,
   deleteNote,
   bulkDeleteNotes,
-  searchNotesByTitle
+  searchNotesByTitle,
+  searchNotesByContent
 };
+
 
 
 
