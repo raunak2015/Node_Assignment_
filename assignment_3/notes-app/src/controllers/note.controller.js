@@ -272,6 +272,38 @@ const bulkDeleteNotes = async (req, res) => {
   }
 };
 
+// 9. Search notes by title (GET /api/notes/search)
+const searchNotesByTitle = async (req, res) => {
+  const query = req.query.q || req.query.query;
+
+  if (!query) {
+    return res.status(400).json({
+      success: false,
+      message: "Search query is required",
+      data: null
+    });
+  }
+
+  try {
+    const notes = await Note.find({
+      title: { $regex: query, $options: "i" }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Notes matching title query: '${query}'`,
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to search notes",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -280,8 +312,10 @@ module.exports = {
   replaceNote,
   updateNote,
   deleteNote,
-  bulkDeleteNotes
+  bulkDeleteNotes,
+  searchNotesByTitle
 };
+
 
 
 
