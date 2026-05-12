@@ -336,6 +336,41 @@ const searchNotesByContent = async (req, res) => {
   }
 };
 
+// 11. Search in title and content (GET /api/notes/search/all)
+const searchAllNotes = async (req, res) => {
+  const query = req.query.q || req.query.query;
+
+  if (!query) {
+    return res.status(400).json({
+      success: false,
+      message: "Search query is required",
+      data: null
+    });
+  }
+
+  try {
+    const notes = await Note.find({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { content: { $regex: query, $options: "i" } }
+      ]
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Notes matching query in title or content: '${query}'`,
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to search notes",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -346,8 +381,10 @@ module.exports = {
   deleteNote,
   bulkDeleteNotes,
   searchNotesByTitle,
-  searchNotesByContent
+  searchNotesByContent,
+  searchAllNotes
 };
+
 
 
 
