@@ -449,6 +449,46 @@ const filterPaginateNotes = async (req, res) => {
   }
 };
 
+// 14. Sort + Paginate notes (GET /api/notes/sort-paginate)
+const sortPaginateNotes = async (req, res) => {
+  const { sortBy, order } = req.query;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const sortOptions = {};
+  const allowedSortFields = ["title", "createdAt", "updatedAt", "category", "isPinned"];
+  const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+  const sortOrder = order === "asc" ? 1 : -1;
+  sortOptions[sortField] = sortOrder;
+
+  try {
+    const total = await Note.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+    const notes = await Note.find().sort(sortOptions).skip(skip).limit(limit);
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched with sorting and pagination",
+      data: notes,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch sort-paginated notes",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -462,8 +502,10 @@ module.exports = {
   searchNotesByContent,
   searchAllNotes,
   filterSortNotes,
-  filterPaginateNotes
+  filterPaginateNotes,
+  sortPaginateNotes
 };
+
 
 
 
