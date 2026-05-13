@@ -489,6 +489,44 @@ const sortPaginateNotes = async (req, res) => {
   }
 };
 
+// 15. Search + Filter notes (GET /api/notes/search-filter)
+const searchFilterNotes = async (req, res) => {
+  const { q, query, category, isPinned } = req.query;
+  const searchQuery = q || query;
+
+  const filter = {};
+  if (category) {
+    filter.category = category;
+  }
+  if (isPinned !== undefined) {
+    filter.isPinned = isPinned === "true";
+  }
+
+  if (searchQuery) {
+    filter.$or = [
+      { title: { $regex: searchQuery, $options: "i" } },
+      { content: { $regex: searchQuery, $options: "i" } }
+    ];
+  }
+
+  try {
+    const notes = await Note.find(filter);
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched with search and filtering",
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch search-filtered notes",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -503,8 +541,10 @@ module.exports = {
   searchAllNotes,
   filterSortNotes,
   filterPaginateNotes,
-  sortPaginateNotes
+  sortPaginateNotes,
+  searchFilterNotes
 };
+
 
 
 
