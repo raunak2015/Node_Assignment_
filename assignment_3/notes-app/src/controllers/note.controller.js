@@ -371,6 +371,42 @@ const searchAllNotes = async (req, res) => {
   }
 };
 
+// 12. Filter + Sort notes (GET /api/notes/filter-sort)
+const filterSortNotes = async (req, res) => {
+  const { category, isPinned, sortBy, order } = req.query;
+
+  const filter = {};
+  if (category) {
+    filter.category = category;
+  }
+  if (isPinned !== undefined) {
+    filter.isPinned = isPinned === "true";
+  }
+
+  const sortOptions = {};
+  const allowedSortFields = ["title", "createdAt", "updatedAt", "category", "isPinned"];
+  const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+  const sortOrder = order === "asc" ? 1 : -1;
+  sortOptions[sortField] = sortOrder;
+
+  try {
+    const notes = await Note.find(filter).sort(sortOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched with filtering and sorting",
+      count: notes.length,
+      data: notes
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch filter-sorted notes",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -382,8 +418,10 @@ module.exports = {
   bulkDeleteNotes,
   searchNotesByTitle,
   searchNotesByContent,
-  searchAllNotes
+  searchAllNotes,
+  filterSortNotes
 };
+
 
 
 
