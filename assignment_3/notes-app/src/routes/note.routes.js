@@ -1,5 +1,5 @@
 const express = require("express");
-const { createNote, bulkCreateNotes, getAllNotes, getNoteById, replaceNote, updateNote, deleteNote, bulkDeleteNotes, searchNotesByTitle, searchNotesByContent, searchAllNotes, filterSortNotes, filterPaginateNotes, sortPaginateNotes, searchFilterNotes } = require("../controllers/note.controller");
+const { createNote, bulkCreateNotes, getAllNotes, getNoteById, replaceNote, updateNote, deleteNote, bulkDeleteNotes, searchNotesByTitle, searchNotesByContent, searchAllNotes, filterSortNotes, filterPaginateNotes, sortPaginateNotes, searchFilterNotes, searchSortPaginateNotes } = require("../controllers/note.controller");
 
 const router = express.Router();
 
@@ -13,6 +13,7 @@ router.get("/filter-sort", filterSortNotes);
 router.get("/filter-paginate", filterPaginateNotes);
 router.get("/sort-paginate", sortPaginateNotes);
 router.get("/search-filter", searchFilterNotes);
+router.get("/search-sort-paginate", searchSortPaginateNotes);
 router.get("/:id", getNoteById);
 router.put("/:id", replaceNote);
 router.patch("/:id", updateNote);

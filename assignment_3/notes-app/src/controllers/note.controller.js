@@ -527,6 +527,55 @@ const searchFilterNotes = async (req, res) => {
   }
 };
 
+// 16. Search + Sort + Paginate notes (GET /api/notes/search-sort-paginate)
+const searchSortPaginateNotes = async (req, res) => {
+  const { q, query, sortBy, order } = req.query;
+  const searchQuery = q || query;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const filter = {};
+  if (searchQuery) {
+    filter.$or = [
+      { title: { $regex: searchQuery, $options: "i" } },
+      { content: { $regex: searchQuery, $options: "i" } }
+    ];
+  }
+
+  const sortOptions = {};
+  const allowedSortFields = ["title", "createdAt", "updatedAt", "category", "isPinned"];
+  const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+  const sortOrder = order === "asc" ? 1 : -1;
+  sortOptions[sortField] = sortOrder;
+
+  try {
+    const total = await Note.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
+    const notes = await Note.find(filter).sort(sortOptions).skip(skip).limit(limit);
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched with search, sorting, and pagination",
+      data: notes,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch search-sort-paginated notes",
+      data: null
+    });
+  }
+};
+
 module.exports = {
   createNote,
   bulkCreateNotes,
@@ -542,8 +591,10 @@ module.exports = {
   filterSortNotes,
   filterPaginateNotes,
   sortPaginateNotes,
-  searchFilterNotes
+  searchFilterNotes,
+  searchSortPaginateNotes
 };
+
 
 
 
